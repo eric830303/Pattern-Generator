@@ -71,7 +71,12 @@ def _Set_Reg_Addr( self, cmd ):
     self.f.write("//(SMI) Reg Address = %s \n" % cmd.REGISTER )
 
     addr = bin( int(cmd.REGISTER,16) )[2:].zfill(5)
-
+    #if( len(addr) > 5 ):
+    #    print( "[Warning] The PHY Address Length for SMI is larger than 5 bits" )
+    #    print( "\tsheet   =", self.current_sheet )
+    #    print( "\trow     =", self.current_row+2 )
+    #    print( "\tCOMMAND =", cmd.COMMAND )
+    #    print( "\tDATA    =", cmd.DATA )
     for b in addr:
         self.cSet_Port_Value( 0, b )
     self.f.write("//(SMI) Finish writing Reg Address\n")
@@ -82,7 +87,11 @@ def _Set_Phy_Addr( self, cmd ):
 
     addr = bin(int(self.phy_adr,16))[2:].zfill(5)
     if( len(addr) > 5 ):
-        print( "[Error] The PHY Address Length for SMI is larger than 5 bits" )
+        print( "[Warning] The PHY Address Length for SMI is larger than 5 bits" )
+        print( "\tsheet   =", self.current_sheet )
+        print( "\trow     =", self.current_row+2 )
+        print( "\tCOMMAND =", cmd.COMMAND )
+        print( "\tDATA    =", cmd.DATA )
     for b in addr:
         self.cSet_Port_Value( 0, b )
     self.f.write("//(SMI) Finish writing PHY Reg Address\n")
@@ -110,9 +119,12 @@ def _Set_RW_Data( self, cmd ):
 
     if( len(value) > 16 ):
         print( "[Warning] The SMI DATA Length for SMI is larger than 16 (It should be 16 bits, based on SPEC)" )
-        print( "\tSMI DATA     is ", value )
-        print( "\tYour COMMAND is ", cmd.COMMAND )
-        print( "\tYour DATA    is ", cmd.DATA )
+        print( "\tBinary SMI DATA     is ", value )
+        print( "\tsheet   =", self.current_sheet )
+        print( "\trow     =", self.current_row+2 )
+        print( "\tCOMMAND =", cmd.COMMAND )
+        print( "\tDATA    =", cmd.DATA )
+       
 
     for v in value:
         if "R" in rw:

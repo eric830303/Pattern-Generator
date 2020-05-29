@@ -20,6 +20,8 @@ class protocol:
         self.excel    = ""
         self.df_port  = ""
         self.df_cmd   = ""
+        self.current_row   = 0
+        self.current_sheet = ""
     def cSet_RW_Format( self, format ):
         pass
     def cSet_Reg_Addr(self):
@@ -107,6 +109,7 @@ def _GenATP( self ):
         exit(-1)
 
     for sheet_name in sheet_list:
+       self.current_sheet = sheet_name
        print( "[INFO] Start Parsing Sheet: %s" % sheet_name )
        self.f = open( sheet_name + ".atp" , "w" )
        self.f.write( "import tset frcgen0;\n" )
@@ -118,6 +121,7 @@ def _GenATP( self ):
        self.df_cmd = self.excel.parse( sheet_name )
        row_cnt = self.df_cmd.shape[0]
        for i in range( 0, row_cnt ):
+           self.current_row = i
            cmd = self.df_cmd.iloc[i]
            #Check cmd format in xlsx
            cmd.DATA = str( cmd.DATA )
