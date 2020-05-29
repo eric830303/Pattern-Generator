@@ -32,7 +32,7 @@ class protocol:
     def cGenATP_Idle( self, cnt ):
         _GenATP_Idle( self, cnt )
     def cGenVectorList( self ):
-        _GenVectorList( self )
+        return _GenVectorList( self )
     def cGenATP( self ):
         _GenATP( self )
     def cParseDataFrame( self ):
