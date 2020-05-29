@@ -110,7 +110,9 @@ def _Set_RW_Data( self, cmd ):
 
     if( len(value) > 16 ):
         print( "[Warning] The SMI DATA Length for SMI is larger than 16 (It should be 16 bits, based on SPEC)" )
-        print( "Your DATA is ", value )
+        print( "\tSMI DATA     is ", value )
+        print( "\tYour COMMAND is ", cmd.COMMAND )
+        print( "\tYour DATA    is ", cmd.DATA )
 
     for v in value:
         if "R" in rw:

@@ -14,6 +14,7 @@ def isDataBinary( DATA ):
 #----------------------------------------------------------------------------
 def check_CMD( cmd ):
     result = True
+    
     if( type(cmd.REGISTER) != str ):
         print("[Error] The reg addr must be present in string format")
         result = False

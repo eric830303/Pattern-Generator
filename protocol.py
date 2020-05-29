@@ -14,7 +14,8 @@ class protocol:
         self.vector   = [] #Port vector
         self.f        = "" #File descriptor
         self.ifdo     = ifdo
-        self.cmd_list = [ "W", "R", "R", "RH", "RL", "D", "F" ]
+        self.cmd_list = [ "W", "R", "RH", "RL", "D", "F", "C", "X", "M" ]
+        self.skip_cmd = [ "F", "C", "X", "M" ] 
         self.infname  = infname
         self.excel    = ""
         self.df_port  = ""
@@ -106,6 +107,7 @@ def _GenATP( self ):
         exit(-1)
 
     for sheet_name in sheet_list:
+       print( "[INFO] Start Parsing Sheet: %s" % sheet_name )
        self.f = open( sheet_name + ".atp" , "w" )
        self.f.write( "import tset frcgen0;\n" )
        self.f.write( "vector \t( $tset, %s ) \n" % self.cGenVectorList() )
@@ -117,20 +119,25 @@ def _GenATP( self ):
        row_cnt = self.df_cmd.shape[0]
        for i in range( 0, row_cnt ):
            cmd = self.df_cmd.iloc[i]
-           
            #Check cmd format in xlsx
            cmd.DATA = str( cmd.DATA )
-           if( cmd.COMMAND == "D" ):
+
+           if  ( cmd.COMMAND == "F" ):
+               break
+           elif( cmd.COMMAND in self.skip_cmd ) or ( pd.isna(cmd.COMMAND) )  or ( pd.isna(cmd.DATA ) ):
+               continue
+           elif( cmd.COMMAND == "D" ):
                self.cGenATP_Idle( int( cmd.DATA ) )
                continue
            elif( not check_CMD( cmd ) ):
-               print("[Error] Invalid cmd format")
+               print("[Error] Invalid cmd format in row %d of sheet %s" % ( i, sheet_name) )
                exit(-1)
 
            self.cSet_RW_Format( cmd )
-
+       self.f.write( "burst_stop_0: halt\n" )
        self.f.write( "}\n" )
        self.f.close()
+       print( "[INFO] End   Parsing Sheet: %s" % sheet_name )
 #---------------------------------------------------------------------
 def _GenATPbyValue( self ):
     vtr = ">frcgen0 "
