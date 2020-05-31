@@ -1,4 +1,5 @@
 from protocol import *
+import copy
 import pandas as pd
 #---------------------------------------------------------------------
 class SMI( protocol ):
@@ -16,7 +17,34 @@ class SMI( protocol ):
     #Dedicated func
     def cSet_Phy_Addr( self, cmd ):
         _Set_Phy_Addr( self, cmd )
+    def c32DataCallBack( self, cmd ):
+        _32DataCallBack( self, cmd )
 
+def _32DataCallBack( self, cmd ):
+    ori = copy.deepcopy( cmd.DATA )
+    cmd1 = copy.deepcopy( cmd )
+    if not isDataMoreThan16( cmd.DATA ): return
+    else:
+        if isDataBinary( cmd.DATA ):
+            full_data = cmd.DATA.zfill(32) if( "W" in cmd.COMMAND ) else cmd.DATA.rjust(32,"x")
+            cmd1.DATA = full_data[-16:]
+            cmd.DATA  = cmd.DATA[:16]
+            self.cSet_RW_Format( cmd1 )
+        else:
+            bin_data  = bin( int( cmd.DATA, 16 ) )[2:]
+            full_data = bin_data.zfill(32) if( "W" in cmd.COMMAND ) else bin_data.rjust(32,"x")
+            cmd1.DATA = full_data[-16:]
+            cmd.DATA  = full_data[:16]
+            self.cSet_RW_Format(cmd1)
+        print("[Warning] DATA length larger then 16 bit (based on SPEC)")
+        print("\tAuto Partition in the tool")
+        print("\tAt sheet  = ", self.current_sheet )
+        print("\tAt row    = ", self.current_row   )
+        print("\tCOMMAND   = ", cmd.COMMAND )
+        print("\tOri DATA  = ", ori )
+        print("\tDATA1     = ", cmd1.DATA, "(Auto partitioned)" )
+        print("\tDATA2     = ",  cmd.DATA, "(Auto partitioned)" )
+            
 #----------------------------------------------------------------------------
 def _Set_Port_Value( self, mdc, mdio, note="" ):
     for p in self.vector:
@@ -29,7 +57,8 @@ def _Set_Port_Value( self, mdc, mdio, note="" ):
 def _Set_RW_Format( self, cmd ):
     if ( cmd.COMMAND not in self.cmd_list ) or ( not self.ifdo ):
         return
-    else:   
+    else:
+        self.c32DataCallBack( cmd )
         #--Preamble------------------
         for i in range(0,32):
             self.cSet_Port_Value( 0, 1, "(smi) %2d/32 Preamble" % (i+1) )
@@ -104,15 +133,6 @@ def _Set_RW_Data( self, cmd ):
             value = cmd.DATA.replace( "_", "" ).zfill(16)
         else:#R, RL, RH
             value = cmd.DATA.replace( "_", "" ).rjust(16,"x")
-
-    if( len(value) > 16 ):
-        print( "[Warning] The SMI DATA Length for SMI is larger than 16 (It should be 16 bits, based on SPEC)" )
-        print( "\tBinary SMI DATA     is ", value )
-        print( "\tsheet   =", self.current_sheet )
-        print( "\trow     =", self.current_row+2 )
-        print( "\tCOMMAND =", cmd.COMMAND )
-        print( "\tDATA    =", cmd.DATA )
-       
 
     for v in value:
         if "R" in rw:

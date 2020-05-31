@@ -30,3 +30,14 @@ def check_CMD( cmd ):
         print("[Error] The folowing cmd cause error:")
         print( cmd )
     return result
+#----------------------------------------------------------------------------
+def isDataMoreThan16( DATA ):
+    result = False
+    if isDataBinary( DATA ):
+        result = True if len( DATA ) > 16 else False
+    #Hex
+    else:
+        length = len( bin( int( DATA, 16 ) )[2:] )
+        result = True if length > 16 else False
+
+    return result

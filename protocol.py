@@ -136,7 +136,6 @@ def _GenATP( self ):
            elif( not check_CMD( cmd ) ):
                print("[Error] Invalid cmd format in row %d of sheet %s" % ( i, sheet_name) )
                exit(-1)
-
            self.cSet_RW_Format( cmd )
        self.f.write( "burst_stop_0: halt\n" )
        self.f.write( "}\n" )
