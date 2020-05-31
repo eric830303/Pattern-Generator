@@ -55,10 +55,40 @@ def _Set_Port_Value( self, mdc, mdio, note="" ):
     self.cGenATPbyValue( note )
 #----------------------------------------------------------------------------
 def _Set_RW_Format( self, cmd ):
+    cmd1 = copy.deepcopy(cmd)
+    cmd2 = copy.deepcopy(cmd)
+    cmd3 = copy.deepcopy(cmd)
+    cmd4 = copy.deepcopy(cmd)
+    #DATA
+    full_data = ""
+    if isDataBinary( cmd.DATA ):
+        full_data = cmd.DATA.zfill(32) if ("W" in cmd.COMMAND) else cmd.DATA.rjust(32, "x")
+    else:
+        bin_data = bin(int(cmd.DATA, 16))[2:]
+        full_data = bin_data.zfill(32) if ("W" in cmd.COMMAND) else bin_data.rjust(32, "x")
+    #REGISTER
+    bin_reg  = bin(int(cmd.REGISTER, 16))[2:]
+    full_reg = bin_data.zfill(32)
+    #Overwrite
+    cmd1.DATA = full_data[-16:]
+    cmd2.DATA = full_data[:16]
+    cmd3.DATA = full_reg[-16:]
+    cmd4.DATA = full_reg[:16]
+    cmd1.REGISTER = "0x00"
+    cmd2.REGISTER = "0x02"
+    cmd3.REGISTER = "0x04"
+    cmd4.REGISTER = "0x06"
+    
+    _Set_RW_Format2( self, cmd1 )
+    _Set_RW_Format2( self, cmd2 )
+    _Set_RW_Format2( self, cmd3 )
+    _Set_RW_Format2( self, cmd4 )
+    
+def _Set_RW_Format2( self, cmd ):
     if ( cmd.COMMAND not in self.cmd_list ) or ( not self.ifdo ):
         return
     else:
-        self.c32DataCallBack( cmd )
+        #self.c32DataCallBack( cmd )
         #--Preamble------------------
         for i in range(0,32):
             self.cSet_Port_Value( 0, 1, "(smi) %2d/32 Preamble" % (i+1) )
@@ -93,14 +123,8 @@ def _Set_RW_Format( self, cmd ):
 def _Set_Reg_Addr( self, cmd ):
 
     addr = bin( int(cmd.REGISTER,16) )[2:].zfill(5)
-    #if( len(addr) > 5 ):
-    #    print( "[Warning] The PHY Address Length for SMI is larger than 5 bits" )
-    #    print( "\tsheet   =", self.current_sheet )
-    #    print( "\trow     =", self.current_row+2 )
-    #    print( "\tCOMMAND =", cmd.COMMAND )
-    #    print( "\tDATA    =", cmd.DATA )
     for b in addr:
-        self.cSet_Port_Value( 0, b, "(SMI) Reg Addr = %s" % cmd.REGISTER )
+        self.cSet_Port_Value( 0, b, "(SMI) Offset = %s (Reg Addr)" % cmd.REGISTER )
     
 #----------------------------------------------------------------------------
 def _Set_Phy_Addr( self, cmd ):
