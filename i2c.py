@@ -10,8 +10,8 @@ class I2C( protocol ):
         _Set_RW_Format( self, cmd )
     def cSet_Reg_Addr( self, cmd ):
         _Set_Reg_Addr( self, cmd )
-    def cSet_Port_Value( self, SCL, SDA ):
-        _Set_Port_Value( self, SCL, SDA )
+    def cSet_Port_Value( self, SCL, SDA, note="" ):
+        _Set_Port_Value( self, SCL, SDA, note )
     def cSet_RW_Data( self, cmd ):
         _Set_RW_Data( self, cmd )
     #Dedicated func
@@ -60,13 +60,13 @@ def _Set_Reg_Addr( self, cmd ):
             ctr += 1
     self.f.write("//(I2C) End writing 24-bit Reg Address\n")
 #---------------------------------------------------------------------
-def _Set_Port_Value( self, SCL, SDA ):
+def _Set_Port_Value( self, SCL, SDA, note="" ):
     for p in self.vector:
         if p.protocol == "i2c-scl":
             p.value = SCL
         if p.protocol == "i2c-sda":
             p.value = SDA
-    self.cGenATPbyValue()
+    self.cGenATPbyValue( note )
 #---------------------------------------------------------------------
 def _Set_RW_Data( self, cmd ):
     rw = cmd.COMMAND

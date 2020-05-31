@@ -9,8 +9,8 @@ class SPI( protocol ):
         _Set_RW_Format( self, cmd )
     def cSet_Reg_Addr( self, cmd ):
         _Set_Reg_Addr( self, cmd )
-    def cSet_Port_Value( self, ss, scl, di, do ):
-        _Set_Port_Value( self, ss, scl, di, do )
+    def cSet_Port_Value( self, ss, scl, di, do, note="" ):
+        _Set_Port_Value( self, ss, scl, di, do, note )
     def cSet_RW_Data( self, cmd ):
         _Set_RW_Data( self, cmd )
 #---------------------------------------------------------------------
@@ -39,24 +39,21 @@ def _Set_RW_Format( self, cmd ):
         self.cSet_Reg_Addr( cmd )
         #------Dummy if Read-------------------
         if ( cmd.COMMAND == "R" ) or ( cmd.COMMAND == "RH" ) or ( cmd.COMMAND == "RL" ) :
-            self.f.write("//(SPI) Begin Dummy\n")
             for i in range( self.dumycycle ):
-                self.cSet_Port_Value( 0, 0, 0, 0 )
-            self.f.write("//(SPI) End Dummy\n")
+                self.cSet_Port_Value( 0, 0, 0, 0, "(spi) Dummy Cycle" )
+            
         #------RW Data-------------------------
         self.cSet_RW_Data( cmd )
 #---------------------------------------------------------------------
 def _Set_Reg_Addr( self, cmd ):
     #The address must be present in hex format
-    self.f.write("//(SPI) Begin writing 24-bit Reg Address\n")
-    self.f.write("//(SPI) Address = %s \n" % cmd.REGISTER )
     adrr = bin(int(cmd.REGISTER,16))[2:].zfill(24)[::-1]
     adrr = adrr[16:24][::-1] + adrr[8:16][::-1] + adrr[0:8][::-1]
     for b in adrr:
-        self.cSet_Port_Value( 0, 0, b, 0 )       
-    self.f.write("//(SPI) End writing 24-bit Reg Address\n")
+        self.cSet_Port_Value( 0, 0, b, 0, "(spi) 24 Reg Addr = %s " % (cmd.REGISTER) )       
+    
 #---------------------------------------------------------------------
-def _Set_Port_Value( self, ss, scl, di, do ):
+def _Set_Port_Value( self, ss, scl, di, do, note="" ):
     for p in self.vector:
         if p.protocol == "spi-ss":
             p.value = ss
@@ -66,12 +63,10 @@ def _Set_Port_Value( self, ss, scl, di, do ):
             p.value = di
         if p.protocol == "spi-do":
             p.value = do
-    self.cGenATPbyValue()
+    self.cGenATPbyValue( note )
 #---------------------------------------------------------------------
 def _Set_RW_Data( self, cmd ):
     rw = cmd.COMMAND
-    self.f.write("//(SPI) Begin %s data\n" % rw)
-    self.f.write("//(SPI) Data = %s \n" % cmd.DATA )
     value = 0
     #Hex format (Must be 32 bit)
     if not isDataBinary( cmd.DATA ):
@@ -93,7 +88,6 @@ def _Set_RW_Data( self, cmd ):
                 v = "H"
             elif v == "0":
                 v = "L"
-            self.cSet_Port_Value( 0, 0, 0, v )
+            self.cSet_Port_Value( 0, 0, 0, v, "(SPI) %s data = %s" % ( rw, cmd.DATA ) )
         else:
-            self.cSet_Port_Value( 0, 0, v, 0 )
-    self.f.write("//(SPI) End %s data\n" % rw)
+            self.cSet_Port_Value( 0, 0, v, 0, "(SPI) %s data = %s" % ( rw, cmd.DATA ) )

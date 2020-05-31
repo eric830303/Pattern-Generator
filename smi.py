@@ -9,8 +9,8 @@ class SMI( protocol ):
         _Set_RW_Format( self, cmd )
     def cSet_Reg_Addr( self, cmd ):
         _Set_Reg_Addr( self, cmd )
-    def cSet_Port_Value( self, mdc, mdio ):
-        _Set_Port_Value( self, mdc, mdio )
+    def cSet_Port_Value( self, mdc, mdio, note="" ):
+        _Set_Port_Value( self, mdc, mdio, note    )
     def cSet_RW_Data( self, cmd ):
         _Set_RW_Data( self, cmd )
     #Dedicated func
@@ -18,57 +18,50 @@ class SMI( protocol ):
         _Set_Phy_Addr( self, cmd )
 
 #----------------------------------------------------------------------------
-def _Set_Port_Value( self, mdc, mdio ):
+def _Set_Port_Value( self, mdc, mdio, note="" ):
     for p in self.vector:
         if p.protocol == "smi-mdc":
             p.value = mdc
         if p.protocol == "smi-mdio":
             p.value = mdio
-    self.cGenATPbyValue()
+    self.cGenATPbyValue( note )
 #----------------------------------------------------------------------------
 def _Set_RW_Format( self, cmd ):
     if ( cmd.COMMAND not in self.cmd_list ) or ( not self.ifdo ):
         return
     else:   
         #--Preamble------------------
-        self.f.write("//(SMI) Begin writing Preamble\n")
         for i in range(0,32):
-            self.cSet_Port_Value( 0, 1 )
-        self.f.write("//(SMI) Finish writing Preamble\n")
+            self.cSet_Port_Value( 0, 1, "(smi) %2d/32 Preamble" % (i+1) )
+
         #--Start-------------- 
-        self.f.write("//(SMI) Start\n")
-        self.cSet_Port_Value( 0, 0 )
+        self.cSet_Port_Value( 0, 0, "(SMI) Start=01" )
         self.cSet_Port_Value( 0, 1 )
         #--OP-----------------
-        self.f.write("//(SMI) Begin writing OP\n")
         if "R" in cmd.COMMAND:
-            self.cSet_Port_Value( 0, 1 )
+            self.cSet_Port_Value( 0, 1, "(SMI) OP=10 (Read)" )
             self.cSet_Port_Value( 0, 0 )
         else:
-            self.cSet_Port_Value( 0, 0 )
-            self.cSet_Port_Value( 0, 1 )
-        self.f.write("//(SMI) Finish writing OP\n")
+            self.cSet_Port_Value( 0, 0, "(SMI) OP=01 (Write)" )
+            self.cSet_Port_Value( 0, 1 )    
         #--Write PHY Addr---------
         self.cSet_Phy_Addr( cmd )
         #--Write Reg Addr---------
         self.cSet_Reg_Addr( cmd )
         #--Turn Around------------
-        self.f.write("//(SMI) Begin writing TA\n")
         if "R" in cmd.COMMAND:
-            self.cSet_Port_Value( 0, 0 )#High-Z
+            self.cSet_Port_Value( 0, 0, "(SMI) TA=00 (READ)"  )#High-Z
             self.cSet_Port_Value( 0, 0 )
         else:
-            self.cSet_Port_Value( 0, 1 )
+            self.cSet_Port_Value( 0, 1, "(SMI) TA=10 (READ)" )
             self.cSet_Port_Value( 0, 0 )
-        self.f.write("//(SMI) Begin writing TA\n")
+        
         #--RW Data----------------
         self.cSet_RW_Data( cmd )
         #--End---------------------
         self.cGenATP_Idle(10)
 #----------------------------------------------------------------------------
 def _Set_Reg_Addr( self, cmd ):
-    self.f.write("//(SMI) Begin writing Reg Address\n")
-    self.f.write("//(SMI) Reg Address = %s \n" % cmd.REGISTER )
 
     addr = bin( int(cmd.REGISTER,16) )[2:].zfill(5)
     #if( len(addr) > 5 ):
@@ -78,13 +71,11 @@ def _Set_Reg_Addr( self, cmd ):
     #    print( "\tCOMMAND =", cmd.COMMAND )
     #    print( "\tDATA    =", cmd.DATA )
     for b in addr:
-        self.cSet_Port_Value( 0, b )
-    self.f.write("//(SMI) Finish writing Reg Address\n")
+        self.cSet_Port_Value( 0, b, "(SMI) Reg Addr = %s" % cmd.REGISTER )
+    
 #----------------------------------------------------------------------------
 def _Set_Phy_Addr( self, cmd ):
-    self.f.write("//(SMI) Begin writing PHY Address\n")
-    self.f.write("//(SMI) PHY Address = %s \n" % self.phy_adr ) 
-
+    
     addr = bin(int(self.phy_adr,16))[2:].zfill(5)
     if( len(addr) > 5 ):
         print( "[Warning] The PHY Address Length for SMI is larger than 5 bits" )
@@ -93,15 +84,12 @@ def _Set_Phy_Addr( self, cmd ):
         print( "\tCOMMAND =", cmd.COMMAND )
         print( "\tDATA    =", cmd.DATA )
     for b in addr:
-        self.cSet_Port_Value( 0, b )
-    self.f.write("//(SMI) Finish writing PHY Reg Address\n")
+        self.cSet_Port_Value( 0, b, "(SMI) PHY Reg Addr = %s" % self.phy_adr)
+   
 #----------------------------------------------------------------------------
 def _Set_RW_Data( self, cmd ):
     rw = cmd.COMMAND
     ack= 0 if ( "R" in cmd.COMMAND ) else "L"
-    self.f.write("//(SMI) Begin %s data\n" % rw)
-    self.f.write("//(SMI) Data = %s \n" % cmd.DATA )
-
     value = 0
     #Hex format (Must be 32 bit)
     
@@ -132,6 +120,6 @@ def _Set_RW_Data( self, cmd ):
                 v = "H"
             elif v == "0":
                 v = "L"
-        self.cSet_Port_Value( 0, v )
-    self.f.write("//(Finish) Finish %s data\n" % rw)
+        self.cSet_Port_Value( 0, v, "(smi) %s data = %s" % ( rw, cmd.DATA ) )
+    
 #----------------------------------------------------------------------------

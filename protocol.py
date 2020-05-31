@@ -30,8 +30,8 @@ class protocol:
         pass
     def cSet_RW_Data(self):
         pass
-    def cGenATPbyValue(self):
-        _GenATPbyValue(self)
+    def cGenATPbyValue(self, note=""):
+        _GenATPbyValue(self, note )
     def cGenATP_Idle( self, cnt ):
         _GenATP_Idle( self, cnt )
     def cGenVectorList( self ):
@@ -143,20 +143,21 @@ def _GenATP( self ):
        self.f.close()
        print( "[INFO] End   Parsing Sheet: %s" % sheet_name )
 #---------------------------------------------------------------------
-def _GenATPbyValue( self ):
-    vtr = ">frcgen0 "
+def _GenATPbyValue( self, note="" ):
+    vtr = "\t\t\t>frcgen0 "
     for p in self.vector:
         vtr += str( p.value ) + " "
-    self.f.write( "%s;\n" % vtr )  
+    note = "//%s" % note if note != "" else ""
+    self.f.write( "%s; %s\n" % ( vtr, note) )  
 #---------------------------------------------------------------------
 def _GenATP_Idle( self, cnt ):
     #Reset
     for p in self.vector:
         p.value = p.ini_value
         
-    self.f.write("//Begin being at Idle !\n")
+    
     for i in range(0,cnt):
-        self.cGenATPbyValue()
+        self.cGenATPbyValue( "Idle" )
 #----------------------------------------------------------------------------
 def _GenVectorList( self ):
     result = ""
