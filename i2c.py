@@ -75,17 +75,18 @@ def _Set_RW_Data( self, cmd ):
     self.f.write("//(I2C) Data = %s \n" % cmd.DATA )
     value = 0
     #Hex format (Must be 32 bit)
+    cmd.DATA = cmd.DATA.upper()
     if not isDataBinary( cmd.DATA ):
         if( "W" in cmd.COMMAND ):
             value =  bin(int(cmd.DATA,16))[2:].zfill(32)[::-1]
         else:
-            value =  bin(int(cmd.DATA,16))[2:].rjust(32,"x")[::-1]
+            value =  bin(int(cmd.DATA,16))[2:].rjust(32,"X")[::-1]
     #Binary format
     else:
         if( "W" in cmd.COMMAND ):
             value = cmd.DATA.replace( "_", "" ).zfill(32)[::-1]
         else:#R, RL, RH
-            value = cmd.DATA.replace( "_", "" ).rjust(32,"x")[::-1]
+            value = cmd.DATA.replace( "_", "" ).rjust(32,"X")[::-1]
 
     value = value[0:8][::-1] + value[8:16][::-1] + value[16:24][::-1] + value[24:32][::-1]
     ctr   = 1

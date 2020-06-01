@@ -63,10 +63,10 @@ def _Set_RW_Format( self, cmd ):
     full_data = ""
     if isDataBinary( cmd.DATA ):
         cmd.DATA = cmd.DATA.replace("_","")
-        full_data = cmd.DATA.zfill(32) if ("W" in cmd.COMMAND) else cmd.DATA.rjust(32, "x")
+        full_data = cmd.DATA.zfill(32) if ("W" in cmd.COMMAND) else cmd.DATA.rjust(32, "X")
     else:
         bin_data = bin(int(cmd.DATA, 16))[2:]
-        full_data = bin_data.zfill(32) if ("W" in cmd.COMMAND) else bin_data.rjust(32, "x")
+        full_data = bin_data.zfill(32) if ("W" in cmd.COMMAND) else bin_data.rjust(32, "X")
     #REGISTER
     bin_reg  = bin(int(cmd.REGISTER, 16))[2:]
     full_reg = bin_reg.zfill(32)
@@ -147,18 +147,18 @@ def _Set_RW_Data( self, cmd ):
     ack= 0 if ( "R" in cmd.COMMAND ) else "L"
     value = 0
     #Hex format (Must be 32 bit)
-    
+    cmd.DATA = cmd.DATA.upper()
     if not isDataBinary( cmd.DATA ):
         if( "W" in cmd.COMMAND ):
             value =  bin(int(cmd.DATA,16))[2:].zfill(16)
         else:
-            value =  bin(int(cmd.DATA,16))[2:].rjust(16,"x")
+            value =  bin(int(cmd.DATA,16))[2:].rjust(16,"X")
     #Binary format
     else:
         if( "W" in cmd.COMMAND ):
             value = cmd.DATA.replace( "_", "" ).zfill(16)
         else:#R, RL, RH
-            value = cmd.DATA.replace( "_", "" ).rjust(16,"x")
+            value = cmd.DATA.replace( "_", "" ).rjust(16,"X")
 
     for v in value:
         if "R" in rw:
