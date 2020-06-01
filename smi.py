@@ -62,6 +62,7 @@ def _Set_RW_Format( self, cmd ):
     #DATA
     full_data = ""
     if isDataBinary( cmd.DATA ):
+        cmd.DATA = cmd.DATA.replace("_","")
         full_data = cmd.DATA.zfill(32) if ("W" in cmd.COMMAND) else cmd.DATA.rjust(32, "x")
     else:
         bin_data = bin(int(cmd.DATA, 16))[2:]

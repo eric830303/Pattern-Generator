@@ -1,16 +1,20 @@
 #---------------------------------------------------------------------
 def isDataBinary( DATA ):
     assert type( DATA ) == str, "DATA should be present in string format"
+    DATA = DATA.lower()
     length = len( DATA.replace( "_", "" ) )
-    
+    hex_list = [ "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f" ]
     if  ( DATA[0:2] != "0x" ) and ( DATA[0:2] != "0X"):
-        return True
+        return True#Bin
     elif( "_" in DATA ):
-        return True
-    elif( length == 16 ) or ( length == 32 ):
-        return True
+        return True#Bin
+    elif( length > 10 ):
+        return True#Bin
     else:
-        return False #Hex
+        for c in hex_list:
+            if c in DATA:
+                return False
+    return False #Hex
 #----------------------------------------------------------------------------
 def check_CMD( cmd ):
     result = True
