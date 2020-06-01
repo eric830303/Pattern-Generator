@@ -68,8 +68,9 @@ def _Set_RW_Format( self, cmd ):
         full_data = bin_data.zfill(32) if ("W" in cmd.COMMAND) else bin_data.rjust(32, "x")
     #REGISTER
     bin_reg  = bin(int(cmd.REGISTER, 16))[2:]
-    full_reg = bin_data.zfill(32)
-    #Overwrite
+    full_reg = bin_reg.zfill(32)
+    full_reg = "10000001"+ full_reg[8:]
+   
     cmd1.DATA = full_data[-16:]
     cmd2.DATA = full_data[:16]
     cmd3.DATA = full_reg[-16:]
