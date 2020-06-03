@@ -71,8 +71,7 @@ def _Set_Port_Value( self, SCL, SDA, note="" ):
 def _Set_RW_Data( self, cmd ):
     rw = cmd.COMMAND
     ack= 1 if ( "R" in cmd.COMMAND ) else "L"
-    self.f.write("//(I2C) Begin %s data\n" % rw)
-    self.f.write("//(I2C) Data = %s \n" % cmd.DATA )
+    self.f.write("//(I2C) Begin %s data = %s\n" % rw, cmd.DATA )
     value = 0
     #Hex format (Must be 32 bit)
     cmd.DATA = cmd.DATA.upper()
@@ -87,8 +86,13 @@ def _Set_RW_Data( self, cmd ):
             value = cmd.DATA.replace( "_", "" ).zfill(32)[::-1]
         else:#R, RL, RH
             value = cmd.DATA.replace( "_", "" ).rjust(32,"X")[::-1]
-
-    value = value[0:8][::-1] + value[8:16][::-1] + value[16:24][::-1] + value[24:32][::-1]
+    #RH/RL/R
+    if(  cmd.COMMAND == "RH" ):
+        value = "X" * 16 + value[16:24][::-1] + value[24:32][::-1]
+    elif cmd.COMMAND == "RL":
+        value = value[0:8][::-1] + value[8:16][::-1] + "X" * 16
+    else:
+        value = value[0:8][::-1] + value[8:16][::-1] + value[16:24][::-1] + value[24:32][::-1]
     ctr   = 1
     byte  = 1
     for v in value:

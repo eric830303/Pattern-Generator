@@ -70,21 +70,56 @@ def _Set_RW_Format( self, cmd ):
     #REGISTER
     bin_reg  = bin(int(cmd.REGISTER, 16))[2:]
     full_reg = bin_reg.zfill(32)
-    full_reg = "10000001"+ full_reg[8:]
-   
-    cmd1.DATA = full_data[-16:]
-    cmd2.DATA = full_data[:16]
-    cmd3.DATA = full_reg[-16:]
-    cmd4.DATA = full_reg[:16]
-    cmd1.REGISTER = "0x00"
-    cmd2.REGISTER = "0x02"
-    cmd3.REGISTER = "0x04"
-    cmd4.REGISTER = "0x06"
-    
+    full_reg = "10000001"+ full_reg[8:] if ("W" in cmd.COMMAND ) else "10000000"+ full_reg[8:]
+    #---
+    if "W" in cmd.COMMAND :
+        cmd1.DATA = full_data[-16:]
+        cmd2.DATA = full_data[:16]
+        cmd3.DATA = full_reg[-16:]
+        cmd4.DATA = full_reg[:16]
+        cmd1.REGISTER = "0x00"
+        cmd2.REGISTER = "0x02"
+        cmd3.REGISTER = "0x04"
+        cmd4.REGISTER = "0x06"
+    elif "RH" in cmd.COMMAND:
+        cmd1.DATA = full_reg[-16:]
+        cmd2.DATA = full_reg[:16]
+        cmd3.DATA = full_data[-16:]
+        cmd4.DATA = "X" * 16
+        cmd1.COMMAND = "W"
+        cmd2.COMMAND = "W"
+        cmd1.REGISTER = "0x04"
+        cmd2.REGISTER = "0x06"
+        cmd3.REGISTER = "0x02"
+        cmd4.REGISTER = "0x00"
+    elif cmd.COMMAND == "RL":
+        cmd1.DATA = full_reg[-16:]
+        cmd2.DATA = full_reg[:16]
+        cmd3.DATA = "X" * 16
+        cmd4.DATA = full_data[-16:]
+        cmd1.COMMAND = "W"
+        cmd2.COMMAND = "W"
+        cmd1.REGISTER = "0x04"
+        cmd2.REGISTER = "0x06"
+        cmd3.REGISTER = "0x02"
+        cmd4.REGISTER = "0x00"
+    else:#R
+        cmd1.DATA = full_reg[-16:]
+        cmd2.DATA = full_reg[:16]
+        cmd3.DATA = full_data[-16:]
+        cmd4.DATA = full_data[:16]
+        cmd1.COMMAND = "W"
+        cmd2.COMMAND = "W"
+        cmd1.REGISTER = "0x04"
+        cmd2.REGISTER = "0x06"
+        cmd3.REGISTER = "0x02"
+        cmd4.REGISTER = "0x00"
+    #---
     _Set_RW_Format2( self, cmd1 )
     _Set_RW_Format2( self, cmd2 )
     _Set_RW_Format2( self, cmd3 )
     _Set_RW_Format2( self, cmd4 )
+    
     
 def _Set_RW_Format2( self, cmd ):
     if ( cmd.COMMAND not in self.cmd_list ) or ( not self.ifdo ):
@@ -114,7 +149,7 @@ def _Set_RW_Format2( self, cmd ):
             self.cSet_Port_Value( 0, 0, "(SMI) TA=00 (READ)"  )#High-Z
             self.cSet_Port_Value( 0, 0 )
         else:
-            self.cSet_Port_Value( 0, 1, "(SMI) TA=10 (READ)" )
+            self.cSet_Port_Value( 0, 1, "(SMI) TA=10 (Write)" )
             self.cSet_Port_Value( 0, 0 )
         
         #--RW Data----------------
