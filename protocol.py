@@ -30,10 +30,10 @@ class protocol:
         pass
     def cSet_RW_Data(self):
         pass
-    def cGenATPbyValue(self, note=""):
-        _GenATPbyValue(self, note )
-    def cGenATP_Idle( self, cnt ):
-        _GenATP_Idle( self, cnt )
+    def cGenATPbyValue(self, note="", preamble=""):
+        _GenATPbyValue(self, note,    preamble   )
+    def cGenATP_Idle( self, cnt, preamble="" ):
+        _GenATP_Idle( self, cnt, preamble )
     def cGenVectorList( self ):
         return _GenVectorList( self )
     def cGenATP( self ):
@@ -137,26 +137,30 @@ def _GenATP( self ):
                print("[Error] Invalid cmd format in row %d of sheet %s" % ( i, sheet_name) )
                exit(-1)
            self.cSet_RW_Format( cmd )
-       self.f.write( "burst_stop_0: halt\n" )
+       self.cGenATP_Idle( 5, "burst_stop_0: halt" )
+       #self.f.write( "burst_stop_0: halt\n" )
        self.f.write( "}\n" )
        self.f.close()
        print( "[INFO] End   Parsing Sheet: %s" % sheet_name )
 #---------------------------------------------------------------------
-def _GenATPbyValue( self, note="" ):
-    vtr = "\t\t\t>frcgen0 "
+def _GenATPbyValue( self, note="", preamble="" ):
+    vtr = "\t\t%s\t>frcgen0 " % preamble
     for p in self.vector:
         vtr += str( p.value ) + " "
     note = "//%s" % note if note != "" else ""
     self.f.write( "%s; %s\n" % ( vtr, note) )  
 #---------------------------------------------------------------------
-def _GenATP_Idle( self, cnt ):
+def _GenATP_Idle( self, cnt, preamble ):
     #Reset
     for p in self.vector:
         p.value = p.ini_value
         
     
-    for i in range(0,cnt):
-        self.cGenATPbyValue( "Idle" )
+    for i in range(0, cnt ):
+        if i == (cnt-1):
+            self.cGenATPbyValue( "Idle", preamble )
+        else:
+            self.cGenATPbyValue( "Idle" )
 #----------------------------------------------------------------------------
 def _GenVectorList( self ):
     result = ""
