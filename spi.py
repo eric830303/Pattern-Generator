@@ -83,7 +83,8 @@ def _Set_RW_Data( self, cmd ):
             value = cmd.DATA.replace( "_", "" ).rjust(32,"X")[::-1]
     #RH/RL/R/W
     if(   cmd.COMMAND == "RH" ):
-        value = value[24:32][::-1] + value[16:24][::-1] + "X" * 16 
+        #value = value[24:32][::-1] + value[16:24][::-1] + "X" * 16 
+        value =  value[8:16][::-1] + value[0:8][::-1] + "X" * 16 
     elif( cmd.COMMAND == "RL" ):
         value = "X" * 16 + value[8:16][::-1] + value[0:8][::-1]
     else:#R/W
