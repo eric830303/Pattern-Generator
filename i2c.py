@@ -59,6 +59,7 @@ def _Set_Reg_Addr( self, cmd ):
         else:
             ctr += 1
     self.f.write("//(I2C) End writing 24-bit Reg Address\n")
+
 #---------------------------------------------------------------------
 def _Set_Port_Value( self, SCL, SDA, note="" ):
     for p in self.vector:
@@ -89,9 +90,9 @@ def _Set_RW_Data( self, cmd ):
     #RH/RL/R
     if(  cmd.COMMAND == "RH" ):
         #value = "X" * 16 + value[16:24][::-1] + value[24:32][::-1]
-        value = "X" * 16 + value[0:8][::-1] + value[8:16][::-1]
+        value =  "X" * 16  + value[0:8][::-1] + value[8:16][::-1]
     elif cmd.COMMAND == "RL":
-        value = value[0:8][::-1] + value[8:16][::-1] + "X" * 16
+        value = value[0:8][::-1] + value[8:16][::-1] +  "X" * 16
     else:
         value = value[0:8][::-1] + value[8:16][::-1] + value[16:24][::-1] + value[24:32][::-1]
     ctr   = 1
