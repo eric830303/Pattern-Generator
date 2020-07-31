@@ -134,3 +134,8 @@ def _Set_End( self ):
     self.cSet_Port_Value( 1, 1 )
     self.cSet_Port_Value( 1, 1 )
     self.cSet_Port_Value( 1, 1 )
+    self.cSet_Port_Value( 1, 1 )
+    self.cSet_Port_Value( 1, 1 )
+    self.cSet_Port_Value( 1, 1 )
+    self.cSet_Port_Value( 1, 1 )
+    self.cSet_Port_Value( 1, 1 )
