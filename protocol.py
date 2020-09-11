@@ -116,7 +116,7 @@ def _GenATP( self ):
        self.f.write( "vector \t( $tset, %s ) \n" % self.cGenVectorList() )
        self.f.write( "{\n" )
        self.f.write( "burst_start_0:\n" )
-       self.cGenATP_Idle(10)
+       
     #-----------Instruction from Excel---------------------------------------
        self.df_cmd = self.excel.parse( sheet_name )
        row_cnt = self.df_cmd.shape[0]
@@ -138,7 +138,6 @@ def _GenATP( self ):
                exit(-1)
            self.cSet_RW_Format( cmd )
        self.cGenATP_Idle( 5, "burst_stop_0: halt" )
-       #self.f.write( "burst_stop_0: halt\n" )
        self.f.write( "}\n" )
        self.f.close()
        print( "[INFO] End   Parsing Sheet: %s" % sheet_name )
@@ -158,9 +157,9 @@ def _GenATP_Idle( self, cnt, preamble ):
     
     for i in range(0, cnt ):
         if i == (cnt-1):
-            self.cGenATPbyValue( "Idle", preamble )
+            self.cGenATPbyValue( "Idle %3d" % i, preamble )
         else:
-            self.cGenATPbyValue( "Idle" )
+            self.cGenATPbyValue( "Idle %3d" % i )
 #----------------------------------------------------------------------------
 def _GenVectorList( self ):
     result = ""
