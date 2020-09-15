@@ -114,6 +114,8 @@ def _Set_RW_Data( self, cmd ):
         
         self.cSet_Port_Value( 0, v, "%s Data[%2d], Data = %s" % (rw, id2, cmd.DATA) )
         if ( id + 1 ) % 8 == 0:
+            if ( id == len( value ) - 1 ) and ( "R" in cmd.COMMAND ):
+                ack = 1
             self.cSet_Port_Value( 0, ack, "ACK" )
             
     
@@ -131,6 +133,6 @@ def _Set_Start( self ):
 #---------------------------------------------------------------------
 def _Set_End( self ):
     self.cSet_Port_Value( 0, 0, "I2C End" )
-    for i in range(100):
-        self.cSet_Port_Value( 1, 1, "Idle %3d" % (i) )
+    #for i in range(100):
+    #    self.cSet_Port_Value( 1, 1, "Idle %3d" % (i) )
     

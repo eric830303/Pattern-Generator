@@ -18,7 +18,6 @@ def _Set_RW_Format( self, cmd ):
     if ( cmd.COMMAND not in self.cmd_list ) or ( not self.ifdo ):
         return
     else:
-        self.cGenATP_Idle(100)
         #------OP-Write-----------------------
         self.cSet_Port_Value( 0, 0, 0, 0, "OP Code [7]" )
         self.cSet_Port_Value( 0, 0, 0, 0, "OP Code [6]" )
