@@ -1,5 +1,6 @@
 from func import *
 import pandas as pd
+import datetime
 #---------------------------------------------------------------------
 class Port:
     def __init__( self, name, value ):
@@ -111,7 +112,9 @@ def _GenATP( self ):
     for sheet_name in sheet_list:
        self.current_sheet = sheet_name
        print( "[INFO] Start Parsing Sheet: %s" % sheet_name )
-       self.f = open( sheet_name + ".atp" , "w" )
+       now = datetime.datetime.now()
+       filename = sheet_name + "_%s%02d%02d_%02d%02d" % ( now.year, now.month, now.day, now.hour, now.minute )
+       self.f = open( filename + ".atp" , "w" )
        self.f.write( "import tset frcgen0;\n" )
        self.f.write( "vector \t( $tset, %s ) \n" % self.cGenVectorList() )
        self.f.write( "{\n" )
